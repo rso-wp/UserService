@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddUserPersistence(builder.Configuration);
-builder.Services.AddEntraAuth(builder.Configuration);
+builder.Services.AddEntraAuth(builder.Configuration, builder.Environment);
 builder.Services.AddScoped<CurrentUserService>();
 builder.Services
     .AddGraphQLServer()
