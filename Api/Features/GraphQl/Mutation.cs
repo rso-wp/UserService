@@ -1,7 +1,6 @@
 using System.Security.Claims;
 using Api.Domain;
 using Api.Features.Users;
-using Api.Infrastructure.Persistance;
 using HotChocolate.Authorization;
 
 namespace Api.Features.GraphQl;
@@ -18,7 +17,6 @@ public class Mutation
         PatchUserInput input,
         ClaimsPrincipal principal,
         CurrentUserService users,
-        UserDbContext db,
         CancellationToken ct)
     {
         var user = await users.GetOrCreateAsync(principal, ct);
@@ -27,7 +25,7 @@ public class Mutation
         if (input.Lastname.HasValue) user.Lastname = input.Lastname.Value;
         if (input.Company.HasValue) user.Company = input.Company.Value;
 
-        await db.SaveChangesAsync(ct);
+        await users.SaveChangesAsync(ct);
         return user;
     }
 }
