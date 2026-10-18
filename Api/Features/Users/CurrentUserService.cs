@@ -39,5 +39,24 @@ public class CurrentUserService(IDbContextOutbox<UserDbContext> outbox)
         return user;
     }
 
-    public Task SaveChangesAsync(CancellationToken ct) => Db.SaveChangesAsync(ct);
+    /// <summary>
+    /// Saves profile changes. The first time a company is set the user also gets a unique tenant slug, published as
+    /// <see cref="TenantAssigned"/> in the same transaction (outbox).
+    /// </summary>
+    public async Task SaveAsync(User user, CancellationToken ct)
+    {
+        if (user.Tenant is null && !string.IsNullOrWhiteSpace(user.Company))
+        {
+            var slug = TenantSlug.From(user.Company);
+            for (var attempt = 1; user.Tenant is null; attempt++)
+            {
+                var candidate = TenantSlug.Candidate(slug, attempt);
+                if (!await Db.Users.AnyAsync(u => u.Tenant == candidate, ct)) user.Tenant = candidate;
+            }
+            // A concurrent user taking the same slug fails on the unique index; the request can simply be retried.
+            await outbox.PublishAsync(new TenantAssigned(user.Id, user.Tenant));
+        }
+
+        await outbox.SaveChangesAndFlushMessagesAsync(ct);
+    }
 }

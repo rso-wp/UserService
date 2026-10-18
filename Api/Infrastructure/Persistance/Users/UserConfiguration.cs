@@ -15,5 +15,7 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
         builder.Property(u => u.Name).HasMaxLength(255);
         builder.Property(u => u.Lastname).HasMaxLength(255);
         builder.Property(u => u.Company).HasMaxLength(255);
+        builder.Property(u => u.Tenant).HasMaxLength(30);
+        builder.HasIndex(u => u.Tenant).IsUnique();
     }
 }

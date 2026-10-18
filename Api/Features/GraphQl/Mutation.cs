@@ -25,7 +25,7 @@ public class Mutation
         if (input.Lastname.HasValue) user.Lastname = input.Lastname.Value;
         if (input.Company.HasValue) user.Company = input.Company.Value;
 
-        await users.SaveChangesAsync(ct);
+        await users.SaveAsync(user, ct);
         return user;
     }
 }

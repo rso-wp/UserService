@@ -9,7 +9,11 @@ public static class UserSubjects
     public const string All = "users.>";
 
     public const string Created = "users.events.created";
+    public const string TenantAssigned = "users.events.tenant-assigned";
 }
 
 /// <summary>A user signed in for the first time. <see cref="UserId"/> is the Entra oid.</summary>
 public record UserCreated(Guid UserId, string Email);
+
+/// <summary>The user got their tenant slug (first time the company was set). Consumed by ProvisioningService.</summary>
+public record TenantAssigned(Guid UserId, string Tenant);
