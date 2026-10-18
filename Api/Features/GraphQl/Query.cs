@@ -9,5 +9,5 @@ public class Query
 {
     [Authorize]
     public Task<User> GetMe(ClaimsPrincipal principal, CurrentUserService users, CancellationToken ct) =>
-        users.GetOrCreateAsync(principal, ct);
+        users.GetAsync(principal, ct);
 }

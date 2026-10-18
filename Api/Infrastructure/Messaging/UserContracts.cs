@@ -12,7 +12,7 @@ public static class UserSubjects
     public const string TenantAssigned = "users.events.tenant-assigned";
 }
 
-/// <summary>A user signed in for the first time. <see cref="UserId"/> is the Entra oid.</summary>
+/// <summary>A user signed up. <see cref="UserId"/> is the user id (token `sub`) in every service.</summary>
 public record UserCreated(Guid UserId, string Email);
 
 /// <summary>The user got their tenant slug (first time the company was set). Consumed by ProvisioningService.</summary>
