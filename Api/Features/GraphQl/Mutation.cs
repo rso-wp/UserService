@@ -23,19 +23,15 @@ public class Mutation
         accounts.LogInAsync(input.Email, input.Password, ct);
 
     [Authorize]
-    public async Task<User> PatchMe(
+    public Task<User> PatchMe(
         PatchUserInput input,
         ClaimsPrincipal principal,
         CurrentUserService users,
-        CancellationToken ct)
-    {
-        var user = await users.GetAsync(principal, ct);
-
-        if (input.Name.HasValue) user.Name = input.Name.Value;
-        if (input.Lastname.HasValue) user.Lastname = input.Lastname.Value;
-        if (input.Company.HasValue) user.Company = input.Company.Value;
-
-        await users.SaveAsync(user, ct);
-        return user;
-    }
+        CancellationToken ct) =>
+        users.UpdateAsync(principal, user =>
+        {
+            if (input.Name.HasValue) user.Name = input.Name.Value;
+            if (input.Lastname.HasValue) user.Lastname = input.Lastname.Value;
+            if (input.Company.HasValue) user.Company = input.Company.Value;
+        }, ct);
 }

@@ -46,6 +46,7 @@ app.UseAuthorization();
 
 app.MapGraphQL();
 app.MapJwks();
+app.MapInternalUsers();
 app.MapObservability();
 app.MapApiDocs("UserService API");
 
