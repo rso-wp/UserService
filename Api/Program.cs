@@ -45,6 +45,7 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapGraphQL();
+app.MapAccounts();
 app.MapJwks();
 app.MapInternalUsers();
 app.MapObservability();
