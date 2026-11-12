@@ -4,7 +4,7 @@ using System.Text.RegularExpressions;
 
 namespace Api.Features.Users;
 
-/// <summary>Turns a company name into a DNS label ("Acme Corp." -> "acme-corp"). Same rule as the frontend preview.</summary>
+/// <summary>Turns a user's name and company into a DNS label ("Jane", "Doe", "Acme Corp." -> "jane-doe-acme-corp"). Same rule as the frontend preview.</summary>
 public static partial class TenantSlug
 {
     public const int MaxLength = 30;
@@ -12,10 +12,10 @@ public static partial class TenantSlug
     [GeneratedRegex("[^a-z0-9]+")]
     private static partial Regex NonAlphanumeric();
 
-    public static string From(string? company)
+    public static string From(string? name, string? lastname, string? company)
     {
         var withoutAccents = new StringBuilder();
-        foreach (var c in (company ?? "").Normalize(NormalizationForm.FormD))
+        foreach (var c in string.Join(' ', name, lastname, company).Normalize(NormalizationForm.FormD))
             if (CharUnicodeInfo.GetUnicodeCategory(c) != UnicodeCategory.NonSpacingMark)
                 withoutAccents.Append(c);
 

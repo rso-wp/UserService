@@ -62,6 +62,10 @@ namespace Api.Infrastructure.Persistance.Migrations
                     b.HasIndex("Tenant")
                         .IsUnique();
 
+                    b.HasIndex("Company", "Name", "Lastname")
+                        .IsUnique()
+                        .HasFilter("\"Company\" IS NOT NULL AND \"Name\" IS NOT NULL AND \"Lastname\" IS NOT NULL");
+
                     b.ToTable("Users", "user_service");
                 });
 

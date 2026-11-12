@@ -98,6 +98,9 @@ public static class AuthErrors
 
     public static GraphQLException InvalidCredentials() => Error("INVALID_CREDENTIALS", "Wrong email or password.");
 
+    public static GraphQLException DuplicateNameInCompany() => Error(
+        "DUPLICATE_NAME_IN_COMPANY", "Someone with this name and last name is already registered in this company.");
+
     public static GraphQLException UserNotFound() => Error("USER_NOT_FOUND", "This account no longer exists.");
 
     private static GraphQLException Error(string code, string message) =>

@@ -12,7 +12,7 @@ public class User
     public string? Company { get; set; }
 
     /// <summary>
-    /// Tenant slug, part of every site host name (site.tenant.domain). Assigned once from the company when it is first set,
+    /// Tenant slug, part of every site host name (site.tenant.domain). Assigned once, from name, last name and company, when all three are first set,
     /// unique, and never changed afterwards so existing site addresses keep working.
     /// </summary>
     public string? Tenant { get; set; }

@@ -20,5 +20,8 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
         builder.Property(u => u.Company).HasMaxLength(255);
         builder.Property(u => u.Tenant).HasMaxLength(30);
         builder.HasIndex(u => u.Tenant).IsUnique();
+        // At most one user with the same name and last name in a company (only once all three are set).
+        builder.HasIndex(u => new { u.Company, u.Name, u.Lastname }).IsUnique()
+            .HasFilter("\"Company\" IS NOT NULL AND \"Name\" IS NOT NULL AND \"Lastname\" IS NOT NULL");
     }
 }
