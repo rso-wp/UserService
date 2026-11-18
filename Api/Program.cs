@@ -15,7 +15,7 @@ builder.Services.AddUserPersistence(builder.Configuration);
 builder.Services.AddJwtAuth(builder.Configuration);
 builder.Services.AddNats(builder.Configuration);
 builder.Services.AddServiceHealthChecks<UserDbContext>();
-builder.Services.AddObservability("user-service");
+builder.Services.AddObservability("user-service", builder.Configuration);
 builder.Services.AddApiDocs("UserService API");
 builder.Services.AddScoped<CurrentUserService>();
 builder.Services.AddScoped<AccountService>();
