@@ -1,4 +1,3 @@
-using Api.Features.Accounts;
 using Api.Features.GraphQl;
 using Api.Features.Users;
 using Api.Infrastructure.ApiDocs;
@@ -18,7 +17,6 @@ builder.Services.AddServiceHealthChecks<UserDbContext>();
 builder.Services.AddObservability("user-service", builder.Configuration);
 builder.Services.AddApiDocs("UserService API");
 builder.Services.AddScoped<CurrentUserService>();
-builder.Services.AddScoped<AccountService>();
 builder.Services
     .AddGraphQLServer()
     .AddAuthorization()
@@ -29,9 +27,6 @@ builder.Services
 builder.Host.UseWolverine(opts => opts.AddUserMessaging(builder.Configuration));
 
 var app = builder.Build();
-
-// Fail fast without a signing key (and create the development key file on the first run).
-app.Services.GetRequiredService<SigningKey>();
 
 // Always in Development; elsewhere when Database:MigrateOnStartup is set (the helm chart's migrateOnStartup).
 if (app.Environment.IsDevelopment() || app.Configuration.GetValue<bool>("Database:MigrateOnStartup"))
@@ -45,8 +40,6 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapGraphQL();
-app.MapAccounts();
-app.MapJwks();
 app.MapInternalUsers();
 app.MapObservability();
 app.MapApiDocs("UserService API");

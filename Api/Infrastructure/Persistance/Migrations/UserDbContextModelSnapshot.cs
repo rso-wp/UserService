@@ -46,18 +46,11 @@ namespace Api.Infrastructure.Persistance.Migrations
                         .HasMaxLength(255)
                         .HasColumnType("character varying(255)");
 
-                    b.Property<string>("PasswordHash")
-                        .HasColumnType("text");
-
                     b.Property<string>("Tenant")
                         .HasMaxLength(30)
                         .HasColumnType("character varying(30)");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("Email")
-                        .IsUnique()
-                        .HasFilter("\"PasswordHash\" IS NOT NULL");
 
                     b.HasIndex("Tenant")
                         .IsUnique();

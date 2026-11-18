@@ -2,11 +2,8 @@ namespace Api.Domain;
 
 public class User
 {
-    public Guid Id { get; set; }       // the token's `sub`, the user id in every service
-    public required string Email { get; set; }  // lowercase, used to log in (unique among accounts with a password)
-
-    /// <summary>ASP.NET Core Identity password hash (PBKDF2). Never exposed over GraphQL.</summary>
-    public string? PasswordHash { get; set; }
+    public Guid Id { get; set; }       // the token's `sub` (Keycloak's user id), the user id in every service
+    public required string Email { get; set; }  // lowercase, copied from the token (Keycloak owns the account and its uniqueness)
     public string? Name { get; set; }
     public string? Lastname { get; set; }
     public string? Company { get; set; }

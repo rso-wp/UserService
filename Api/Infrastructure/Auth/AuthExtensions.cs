@@ -1,9 +1,5 @@
 using System.Security.Claims;
-using Api.Domain;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.Extensions.DependencyInjection.Extensions;
-using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 
 namespace Api.Infrastructure.Auth;
@@ -11,35 +7,29 @@ namespace Api.Infrastructure.Auth;
 public static class AuthExtensions
 {
     /// <summary>
-    /// Password hashing, token issuing and bearer validation of our own tokens (with the key we hold; the other services
-    /// fetch it from /.well-known/jwks.json instead).
+    /// Bearer validation of the access tokens Keycloak issues (it owns sign-up, log-in and passwords). Settings, section "Auth":
+    /// <c>Issuer</c> is the realm URL as the browser sees it (the token's <c>iss</c>), <c>Audience</c> the API's audience
+    /// (<c>rso-api</c>, put in the token by a Keycloak mapper), and <c>MetadataAddress</c> Keycloak's discovery document, from
+    /// which the signing keys are read and refreshed (cluster-internal http, so it can differ from <c>Issuer</c>).
     /// </summary>
     public static IServiceCollection AddJwtAuth(this IServiceCollection services, IConfiguration configuration)
     {
-        services.AddOptions<AuthOptions>()
-            .Bind(configuration.GetSection(AuthOptions.Section))
-            .Validate(o => o.Issuer != "" && o.Audience != "", "'Auth:Issuer' and 'Auth:Audience' must be configured.")
-            .ValidateOnStart();
+        var section = configuration.GetSection("Auth");
+        string Required(string key) => section[key] is { Length: > 0 } value
+            ? value
+            : throw new InvalidOperationException($"'Auth:{key}' is not configured.");
 
-        services.AddSingleton(sp => SigningKey.Load(
-            sp.GetRequiredService<IOptions<AuthOptions>>().Value.SigningKey,
-            sp.GetRequiredService<IHostEnvironment>(),
-            sp.GetRequiredService<ILogger<SigningKey>>()));
-        services.TryAddSingleton(TimeProvider.System);
-        services.AddSingleton<TokenIssuer>();
-        services.AddSingleton<IPasswordHasher<User>, PasswordHasher<User>>();
-
-        services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer();
-        services.AddOptions<JwtBearerOptions>(JwtBearerDefaults.AuthenticationScheme)
-            .Configure<SigningKey, IOptions<AuthOptions>>((options, key, auth) =>
+        services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+            .AddJwtBearer(options =>
             {
                 options.MapInboundClaims = false; // keep raw claim names (sub, email, ...)
+                options.MetadataAddress = Required("MetadataAddress");
+                options.RequireHttpsMetadata = false; // Keycloak is reached inside the cluster / on localhost
                 options.TokenValidationParameters = new TokenValidationParameters
                 {
-                    ValidIssuer = auth.Value.Issuer,
-                    ValidAudience = auth.Value.Audience,
-                    IssuerSigningKey = key.PublicKey,
-                    ValidAlgorithms = [SigningKey.Algorithm]
+                    ValidIssuer = Required("Issuer"),
+                    ValidAudience = Required("Audience"),
+                    ValidAlgorithms = [SecurityAlgorithms.RsaSha256]
                 };
             });
         services.AddAuthorization();
@@ -47,8 +37,15 @@ public static class AuthExtensions
         return services;
     }
 
+    /// <summary>The user id: Keycloak's user id, the token's <c>sub</c>, the same id in every service.</summary>
     public static Guid GetUserId(this ClaimsPrincipal principal) =>
         Guid.TryParse(principal.FindFirstValue("sub"), out var id)
             ? id
             : throw new InvalidOperationException("Token has no valid 'sub' claim.");
+
+    public static string? GetEmail(this ClaimsPrincipal principal) => principal.FindFirstValue("email");
+
+    public static string? GetGivenName(this ClaimsPrincipal principal) => principal.FindFirstValue("given_name");
+
+    public static string? GetFamilyName(this ClaimsPrincipal principal) => principal.FindFirstValue("family_name");
 }
